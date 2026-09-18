@@ -1,0 +1,12 @@
+my_add_test(generationtests
+  HEADER
+    data/testclass.hpp
+    data/inheritance.hpp
+    data/methods.hpp
+  SOURCE
+    generateMethodsTests.cpp
+    data/testclass.cpp
+  DEPENDS
+    Rtti::Generation
+    Rtti::Structures
+)
