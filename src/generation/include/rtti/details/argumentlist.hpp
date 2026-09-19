@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rtti/details/typetools.hpp"
+#include "rtti/details/metatools.hpp"
 
 #include <meta>
 #include <tuple>
@@ -37,7 +37,7 @@ struct argument_trait {
   using type_t = [:std::meta::type_of(arg_i):];
 
   static constexpr auto name = std::meta::identifier_of(arg_i);
-  static constexpr auto type_name = getTypeName<std::meta::type_of(arg_i)>();
+  static constexpr auto type_name = rtti::detail::type_name<type_t>();
 
   static constexpr bool is_const = std::meta::is_const(arg_i);
   static constexpr bool is_pointer = std::meta::is_pointer_type(arg_i);

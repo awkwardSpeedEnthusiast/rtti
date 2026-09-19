@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <sys/types.h>
 #include <utility>
 #include <vector>
 
@@ -40,21 +41,23 @@ class MetaMethod
 {
 public:
   enum Mode : uint8_t {
+    NONE = 0x00,
     CONST = 0x01,
     VIRTUAL = 0x02,
     PURE_VIRTUAL = 0x04,
     OVERRIDE = 0x08,
     FINAL = 0x10,
     MEMBER = 0x20,
+    LAMBDA = 0x40,
   };
 
 private:
   class Impl
   {
   public:
+    virtual ~Impl() = default;
     virtual std::any invoke(std::vector<std::any> const& params) = 0;
     virtual std::unique_ptr<Impl> clone() const = 0;
-    virtual size_t argumentCount() const = 0;
   };
 
   template <typename T>
@@ -64,19 +67,16 @@ private:
     template <typename R, typename... Args>
     explicit Impl_t(R (*f)(Args...))
       : _func(f)
-      , _count { sizeof...(Args) }
     {
     }
     template <typename R, typename C, typename... Args>
     explicit Impl_t(R (C::*f)(Args...))
       : _func(f)
-      , _count { sizeof...(Args) + 1 }
     {
     }
     template <typename R, typename C, typename... Args>
     explicit Impl_t(R (C::*f)(Args...) const)
       : _func(f)
-      , _count { sizeof...(Args) + 1 }
     {
     }
     std::unique_ptr<Impl> clone() const override
@@ -111,13 +111,50 @@ private:
       }
     }
 
-    size_t argumentCount() const override
+    T _func;
+  };
+
+  template <typename T>
+  class Impl_lambda_t : public Impl
+  {
+  public:
+    explicit Impl_lambda_t(T&& lambda)
+      : _lambda(lambda)
     {
-      return _count;
+    }
+    std::unique_ptr<Impl> clone() const override
+    {
+      return std::make_unique<Impl_lambda_t<T>>(_lambda);
     }
 
-    T _func;
-    size_t const _count;
+    template <int N>
+    using NthTypeOf =
+      typename std::tuple_element<N, typename detail::lambda_traits<T>::argument_t>::type;
+
+    template <std::size_t... Indices>
+    auto invokeImpl(std::vector<std::any> const& v, std::index_sequence<Indices...>)
+    {
+      if constexpr (std::same_as<void, typename detail::lambda_traits<T>::result_t>) {
+        std::invoke(_lambda, std::any_cast<NthTypeOf<Indices>>(v[Indices])...);
+      } else {
+        return std::invoke(_lambda, std::any_cast<NthTypeOf<Indices>>(v[Indices])...);
+      }
+    }
+
+    std::any invoke(std::vector<std::any> const& values) override
+    {
+      if constexpr (std::same_as<void, typename detail::lambda_traits<T>::result_t>) {
+        invokeImpl(values, std::make_index_sequence<
+                             std::tuple_size_v<typename detail::lambda_traits<T>::argument_t>>());
+        return {};
+      } else {
+        return invokeImpl(values,
+                          std::make_index_sequence<
+                            std::tuple_size_v<typename detail::lambda_traits<T>::argument_t>>());
+      }
+    }
+
+    T _lambda;
   };
 
 public:
@@ -138,17 +175,57 @@ public:
    */
   template <typename T>
   MetaMethod(T function, std::string_view name, std::string_view return_type,
-             std::span<std::string_view> arguments, uint8_t modes)
+             std::vector<std::string_view> arguments, uint8_t modes = Mode::NONE)
     : _p { std::make_unique<Impl_t<T>>(function) }
     , _name { name }
-    , _returnType { return_type }
+#ifdef MY_USE_REFLECTION
+    , _returnType { detail::function_traits<T>::result_type_name }
+#else
+    , _returnType(return_type)
+#endif
     , _arguments { arguments.begin(), arguments.end() }
-    , _modes { modes }
+    , _modes { static_cast<uint8_t>(
+        modes | (detail::function_traits<T>::is_const::value ? Mode::CONST : Mode::NONE)
+        | (detail::function_traits<T>::is_member::value ? Mode::MEMBER : Mode::NONE)) }
   {
+#ifdef MY_USE_REFLECTION
+    (void) return_type;
+#else
+#endif
     if (arguments.size() != std::tuple_size_v<typename detail::function_traits<T>::argument_t>) {
       throw std::runtime_error(std::format(
         "Argument count mismatch for meta method {}: named ({}) vs from function pointer ({})",
-        _name, _arguments.size(), _p->argumentCount()));
+        _name, _arguments.size(),
+        std::tuple_size_v<typename detail::function_traits<T>::argument_t>));
+    }
+  }
+
+  /**
+   * @brief Construct a new Meta Method from a lambda
+   *
+   * @tparam T the lambda type
+   * @param lambda the lambda object
+   * @param name name of the lambda
+   * @param arguments the argument names of the lambda
+   */
+  template <typename T>
+  MetaMethod(T&& lambda, std::string_view name, std::vector<std::string_view> arguments)
+    : _p { std::make_unique<Impl_lambda_t<T>>(std::forward<T>(lambda)) }
+    , _name { name }
+#ifdef MY_USE_REFLECTION
+    , _returnType { detail::lambda_traits<T>::result_type_name }
+#endif
+    , _arguments { arguments.begin(), arguments.end() }
+    , _modes { static_cast<uint8_t>(
+                 (detail::lambda_traits<T>::is_const::value ? Mode::CONST : Mode::NONE)
+                 | (detail::lambda_traits<T>::is_member::value ? Mode::MEMBER : Mode::NONE))
+               | Mode::LAMBDA }
+  {
+    if (arguments.size() != std::tuple_size_v<typename detail::lambda_traits<T>::argument_t>) {
+      throw std::runtime_error(std::format(
+        "Argument count mismatch for meta method {}: named ({}) vs from function pointer ({})",
+        _name, _arguments.size(),
+        std::tuple_size_v<typename detail::lambda_traits<T>::argument_t>));
     }
   }
 
@@ -242,6 +319,14 @@ public:
    * @return false
    */
   bool isMember() const;
+
+  /**
+   * @brief queries whether it represents a lambda
+   *
+   * @return true
+   * @return false
+   */
+  bool isLambda() const;
 
 private:
   std::unique_ptr<Impl> _p;

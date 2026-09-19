@@ -117,4 +117,9 @@ bool MetaMethod::isMember() const
   return (_modes & Mode::MEMBER) != 0;
 }
 
+bool MetaMethod::isLambda() const
+{
+  return (_modes & Mode::LAMBDA) != 0;
+}
+
 } // namespace rtti

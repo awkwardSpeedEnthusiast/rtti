@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rtti/details/argumentlist.hpp"
-#include "rtti/details/typetools.hpp"
+#include "rtti/details/metatools.hpp"
 
 #include <meta>
 
@@ -19,8 +19,7 @@ struct method_traits {
   using function_ptr_t = [:std::meta::type_of(meth_i):];
 
   static constexpr auto name = std::meta::identifier_of(meth_i);
-  static constexpr auto result_type =
-    ::rtti::details::getTypeName<std::meta::return_type_of(meth_i)>();
+  static constexpr auto result_type = ::rtti::detail::type_name<result_type_t>();
 
   static constexpr auto function_ptr = to_member_pointer_helper<meth_i>;
 

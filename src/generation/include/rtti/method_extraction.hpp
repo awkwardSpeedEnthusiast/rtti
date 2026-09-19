@@ -23,17 +23,16 @@
 template <typename trait>
 rtti::MetaMethod createMethod()
 {
+  using M = rtti::MetaMethod::Mode;
   std::vector<std::string_view> names;
   std::ranges::copy(trait::argumentNames | std::views::reverse, std::back_inserter(names));
   names.insert(names.begin(), "this");
-  return rtti::MetaMethod {
-    trait::function_ptr, trait::name, trait::result_type, names,
-    rtti::MetaMethod::Mode::MEMBER + (trait::is_virtual ? rtti::MetaMethod::Mode::VIRTUAL : 0x0)
-      + (trait::is_pure_virtual ? rtti::MetaMethod::Mode::PURE_VIRTUAL : 0x0)
-      + (trait::is_const ? rtti::MetaMethod::Mode::CONST : 0x0)
-      + (trait::is_override ? rtti::MetaMethod::Mode::OVERRIDE : 0x0)
-      + (trait::is_final ? rtti::MetaMethod::Mode::FINAL : 0x0)
-  };
+  return rtti::MetaMethod { trait::function_ptr, trait::name, trait::result_type, names,
+                            M::MEMBER | (trait::is_virtual ? M::VIRTUAL : M::NONE)
+                              | (trait::is_pure_virtual ? M::PURE_VIRTUAL : M::NONE)
+                              | (trait::is_const ? M::CONST : M::NONE)
+                              | (trait::is_override ? M::OVERRIDE : M::NONE)
+                              | (trait::is_final ? M::FINAL : M::NONE) };
 }
 
 /**

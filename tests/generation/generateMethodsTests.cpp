@@ -18,7 +18,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   auto nameMethod = createMethod<my::test::ns::MyTestClass, 1>();
 
   EXPECT_EQ(nameMethod.name(), "name");
-  EXPECT_EQ(nameMethod.returnType(), "string");
+  EXPECT_EQ(nameMethod.returnType(), "std::__cxx11::basic_string<char>");
   EXPECT_EQ(nameMethod.description(), "");
   EXPECT_THAT(nameMethod.argumentNames(), ElementsAreArray({ "this" }));
   EXPECT_TRUE(nameMethod.isConst());
@@ -44,7 +44,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   auto value1Method = createMethod<my::test::ns::MyTestClass, 3>();
 
   EXPECT_EQ(value1Method.name(), "values");
-  EXPECT_EQ(value1Method.returnType(), "<unknown>");
+  EXPECT_EQ(value1Method.returnType(), "std::span<float>");
   EXPECT_EQ(value1Method.description(), "");
   EXPECT_THAT(value1Method.argumentNames(), ElementsAreArray({ "this" }));
   EXPECT_FALSE(value1Method.isConst());
@@ -57,7 +57,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   auto value2Method = createMethod<my::test::ns::MyTestClass, 4>();
 
   EXPECT_EQ(value2Method.name(), "values");
-  EXPECT_EQ(value2Method.returnType(), "<unknown>");
+  EXPECT_EQ(value2Method.returnType(), "std::span<const float>");
   EXPECT_EQ(value2Method.description(), "");
   EXPECT_THAT(value2Method.argumentNames(), ElementsAreArray({ "this" }));
   EXPECT_TRUE(value2Method.isConst());
@@ -89,7 +89,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 0>();
     EXPECT_EQ(m.name(), "abstract_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -102,7 +102,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 1>();
     EXPECT_EQ(m.name(), "virtual_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -115,7 +115,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 2>();
     EXPECT_EQ(m.name(), "abstract_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -128,7 +128,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 3>();
     EXPECT_EQ(m.name(), "virtual_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -141,7 +141,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 4>();
     EXPECT_EQ(m.name(), "const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -154,7 +154,7 @@ TEST(MethodGenerationTest, methodTypes_base)
   {
     auto m = createMethod<BaseClass, 5>();
     EXPECT_EQ(m.name(), "method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -171,7 +171,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
   {
     auto m = createMethod<DerivedClass, 0>();
     EXPECT_EQ(m.name(), "abstract_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -184,7 +184,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
   {
     auto m = createMethod<DerivedClass, 1>();
     EXPECT_EQ(m.name(), "virtual_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -197,7 +197,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
   {
     auto m = createMethod<DerivedClass, 2>();
     EXPECT_EQ(m.name(), "abstract_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -210,7 +210,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
   {
     auto m = createMethod<DerivedClass, 3>();
     EXPECT_EQ(m.name(), "virtual_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -223,7 +223,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
   {
     auto m = createMethod<DerivedClass, 4>();
     EXPECT_EQ(m.name(), "const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -240,7 +240,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
   {
     auto m = createMethod<DerivedClassWithFinal, 0>();
     EXPECT_EQ(m.name(), "abstract_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -253,7 +253,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
   {
     auto m = createMethod<DerivedClassWithFinal, 1>();
     EXPECT_EQ(m.name(), "virtual_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -266,7 +266,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
   {
     auto m = createMethod<DerivedClassWithFinal, 2>();
     EXPECT_EQ(m.name(), "abstract_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -279,7 +279,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
   {
     auto m = createMethod<DerivedClassWithFinal, 3>();
     EXPECT_EQ(m.name(), "virtual_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -296,7 +296,7 @@ TEST(MethodGenerationTest, methodTypes_final)
   {
     auto m = createMethod<FinalClass, 0>();
     EXPECT_EQ(m.name(), "abstract_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -309,7 +309,7 @@ TEST(MethodGenerationTest, methodTypes_final)
   {
     auto m = createMethod<FinalClass, 1>();
     EXPECT_EQ(m.name(), "virtual_const_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_TRUE(m.isConst());
@@ -322,7 +322,7 @@ TEST(MethodGenerationTest, methodTypes_final)
   {
     auto m = createMethod<FinalClass, 2>();
     EXPECT_EQ(m.name(), "abstract_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
@@ -335,7 +335,7 @@ TEST(MethodGenerationTest, methodTypes_final)
   {
     auto m = createMethod<FinalClass, 3>();
     EXPECT_EQ(m.name(), "virtual_method");
-    EXPECT_EQ(m.returnType(), "<unknown>");
+    EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this" }));
     EXPECT_FALSE(m.isConst());
