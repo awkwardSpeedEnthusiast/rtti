@@ -6,6 +6,7 @@ my_add_test(generationtests
   SOURCE
     generateMethodsTests.cpp
     data/testclass.cpp
+    generatclasstests.cpp
   DEPENDS
     Rtti::Generation
     Rtti::Structures

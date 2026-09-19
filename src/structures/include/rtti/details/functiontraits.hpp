@@ -1,11 +1,9 @@
 #pragma once
 
+#include "rtti/details/metatools.hpp"
+
 #include <tuple>
 #include <type_traits>
-#if defined(__cpp_impl_reflection) && defined(__cpp_impl_reflection)
-#  define MY_USE_REFLECTION
-#  include "rtti/details/metatools.hpp"
-#endif
 
 namespace rtti::detail
 {

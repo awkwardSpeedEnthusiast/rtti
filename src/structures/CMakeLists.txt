@@ -6,6 +6,7 @@ my_add_library(structures
     include/rtti/details/functiontraits.hpp
   SOURCE
     src/metamethod.cpp
+    src/metaclass.cpp
   INCLUDES
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

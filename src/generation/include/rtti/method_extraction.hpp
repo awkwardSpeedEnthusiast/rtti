@@ -1,8 +1,8 @@
 #pragma once
 
 #include "rtti/details/argumentlist.hpp"
+#include "rtti/details/metatools.hpp"
 #include "rtti/details/methodtrait.hpp"
-#include "rtti/details/typetools.hpp"
 
 #include "rtti/metamethod.hpp"
 
@@ -23,16 +23,19 @@
 template <typename trait>
 rtti::MetaMethod createMethod()
 {
-  using M = rtti::MetaMethod::Mode;
-  std::vector<std::string_view> names;
-  std::ranges::copy(trait::argumentNames | std::views::reverse, std::back_inserter(names));
-  names.insert(names.begin(), "this");
-  return rtti::MetaMethod { trait::function_ptr, trait::name, trait::result_type, names,
-                            M::MEMBER | (trait::is_virtual ? M::VIRTUAL : M::NONE)
-                              | (trait::is_pure_virtual ? M::PURE_VIRTUAL : M::NONE)
-                              | (trait::is_const ? M::CONST : M::NONE)
-                              | (trait::is_override ? M::OVERRIDE : M::NONE)
-                              | (trait::is_final ? M::FINAL : M::NONE) };
+  static rtti::MetaMethod method = []() {
+    using M = rtti::MetaMethod::Mode;
+    std::vector<std::string_view> names;
+    std::ranges::copy(trait::argumentNames | std::views::reverse, std::back_inserter(names));
+    names.insert(names.begin(), "this");
+    return rtti::MetaMethod { trait::function_ptr, trait::name, trait::result_type, names,
+                              M::MEMBER | (trait::is_virtual ? M::VIRTUAL : M::NONE)
+                                | (trait::is_pure_virtual ? M::PURE_VIRTUAL : M::NONE)
+                                | (trait::is_const ? M::CONST : M::NONE)
+                                | (trait::is_override ? M::OVERRIDE : M::NONE)
+                                | (trait::is_final ? M::FINAL : M::NONE) };
+  }();
+  return method;
 }
 
 /**

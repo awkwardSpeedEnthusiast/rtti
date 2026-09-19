@@ -3,8 +3,11 @@ my_add_library(generation
   ALIAS Rtti::Generation
   HEADER
     include/rtti/method_extraction.hpp
+    include/rtti/class_extraction.hpp
     include/rtti/details/argumentlist.hpp
     include/rtti/details/methodtrait.hpp
+    include/rtti/details/methodlist.hpp
+    include/rtti/details/classtrait.hpp
   INCLUDES
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
   DEPENDS

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <meta>
+#if defined(__cpp_impl_reflection) && defined(__cpp_impl_reflection)
+#  define MY_USE_REFLECTION
+#  include <meta>
 
 namespace rtti::detail
 {
@@ -24,3 +26,4 @@ consteval auto type_name()
   }
 }
 } // namespace rtti::detail
+#endif

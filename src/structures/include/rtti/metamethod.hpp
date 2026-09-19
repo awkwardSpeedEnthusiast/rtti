@@ -3,6 +3,7 @@
 #include "rtti/details/functiontraits.hpp"
 
 #include <any>
+#include <compare>
 #include <concepts>
 #include <cstdint>
 #include <format>
@@ -56,6 +57,7 @@ private:
   {
   public:
     virtual ~Impl() = default;
+    virtual std::strong_ordering compare(Impl const* other) const = 0;
     virtual std::any invoke(std::vector<std::any> const& params) = 0;
     virtual std::unique_ptr<Impl> clone() const = 0;
   };
@@ -82,6 +84,14 @@ private:
     std::unique_ptr<Impl> clone() const override
     {
       return std::make_unique<Impl_t<T>>(_func);
+    }
+    std::strong_ordering compare(Impl const* other) const override
+    {
+      if (auto* casted = dynamic_cast<Impl_t<T> const*>(other); casted != nullptr) {
+        return this->_func == casted->_func ? std::strong_ordering::equal
+                                            : std::strong_ordering::less;
+      }
+      return std::strong_ordering::less;
     }
 
     template <int N>
@@ -125,6 +135,14 @@ private:
     std::unique_ptr<Impl> clone() const override
     {
       return std::make_unique<Impl_lambda_t<T>>(_lambda);
+    }
+    std::strong_ordering compare(Impl const* other) const override
+    {
+      if (auto* casted = dynamic_cast<Impl_lambda_t<T> const*>(other); casted != nullptr) {
+        return this->_lambda == casted->_lambda ? std::strong_ordering::equal
+                                                : std::strong_ordering::less;
+      }
+      return std::strong_ordering::less;
     }
 
     template <int N>
@@ -233,6 +251,15 @@ public:
   MetaMethod(MetaMethod&& other);
   MetaMethod& operator=(MetaMethod const& other);
   MetaMethod& operator=(MetaMethod&& other);
+
+  auto operator<=>(MetaMethod const& other) const
+  {
+    return _p->compare(other._p.get());
+  }
+  auto operator==(MetaMethod const& other) const
+  {
+    return _p->compare(other._p.get()) == std::strong_ordering::equal;
+  }
 
   /**
    * @brief Invoke the method
