@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rtti/details/tuplebuilder.hpp"
 #include "rtti/method_extraction.hpp"
 
 #include <meta>
@@ -31,44 +32,42 @@ consteval bool isFunction()
 }
 
 /**
- * @brief convert the member reflection to a tuple of method traits
+ * @brief Predicate to be used to accept methods
  *
- * this structure and the two following ones (template specializations) do the heavy lifting of
- * extracting information about possible method members out of a class. It is called recursively
- * (the index \a I incrementing from 0 to \a N) adding the method_trait item to the \a Args...
- * parameter pack if a method of interest until the number of members \a N is reached.
- * There the parameter pack is converted to a tuple type.
- *
- * Well, actually no function is called, but types are constructed. Doesn't matter, works anyway.
- *
- * @tparam T
- * @tparam I
- * @tparam N
- * @tparam Args
+ * @tparam m the method reflection
  */
-template <typename T, size_t I, size_t N, typename... Args>
-struct method_helper {
-  static constexpr auto meth_i =
-    std::meta::members_of(^^T, std::meta::access_context::unprivileged())[I];
-  using method_tuple = typename std::conditional_t<
-    isFunction<meth_i>(),
-    typename method_helper<T, I + 1, N, rtti::details::method_traits<T, I>, Args...>::method_tuple,
-    typename method_helper<T, I + 1, N, Args...>::method_tuple>;
+template <std::meta::info m>
+struct isFunction_t {
+  static constexpr auto value = rtti::details::isFunction<m>();
 };
+
 /**
- * @brief no method recursion break case
+ * @brief extract the list of members from a class reflection
+ *
+ * @tparam c the class reflection
  */
-template <typename T, size_t N>
-struct method_helper<T, N, N> {
-  using method_tuple = std::tuple<>;
+template <std::meta::info c>
+struct members {
+  static constexpr auto list =
+    std::define_static_array(std::meta::members_of(c, std::meta::access_context::unprivileged()));
 };
+
 /**
- * @brief recursion break case
+ * @brief Alias for extracting information about a list of methods inside a class
+ *
+ * Using the tuple builder structure, we can fix some of the strategies for the
+ * use with method lists:
+ *   * \a members shall be extracted
+ *   * only function members shall be taken (no operators, constructors, etc.)
+ *   * the trait type is \a method_t
+ *
+ * This leaves the class reflection as only template parameter
+ *
+ * @tparam clazz
  */
-template <typename T, size_t N, typename... Args>
-struct method_helper<T, N, N, Args...> {
-  using method_tuple = std::tuple<Args...>;
-};
+template <std::meta::info clazz>
+using methodList_builder =
+  rtti::tuple_builder_t<clazz, rtti::details::members, rtti::details::isFunction_t, method_t>;
 
 /**
  * @brief Get the array from tuple object

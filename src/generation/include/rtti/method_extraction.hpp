@@ -26,7 +26,7 @@ rtti::MetaMethod createMethod()
   static rtti::MetaMethod method = []() {
     using M = rtti::MetaMethod::Mode;
     std::vector<std::string_view> names;
-    std::ranges::copy(trait::argumentNames | std::views::reverse, std::back_inserter(names));
+    std::ranges::copy(trait::argumentNames, std::back_inserter(names));
     names.insert(names.begin(), "this");
     return rtti::MetaMethod { trait::function_ptr, trait::name, trait::result_type, names,
                               M::MEMBER | (trait::is_virtual ? M::VIRTUAL : M::NONE)
@@ -46,12 +46,11 @@ rtti::MetaMethod createMethod()
  * \note the compiler will throw a meta exception if the index does not represent a publically
  * accessible non-static member function.
  *
- * @tparam T the class the method is part of
- * @tparam I the index of the method inside the class
+ * @tparam method the reflection of the method in question
  * @return rtti::MetaMethod
  */
-template <typename T, size_t I>
+template <std::meta::info method>
 rtti::MetaMethod createMethod()
 {
-  return createMethod<rtti::details::method_traits<T, I>>();
+  return createMethod<rtti::details::method_t<method>>();
 }

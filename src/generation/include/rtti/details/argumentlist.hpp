@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rtti/details/metatools.hpp"
+#include "rtti/details/tuplebuilder.hpp"
 
 #include <meta>
 #include <tuple>
@@ -20,29 +21,56 @@ namespace rtti::details::arguments
 /**
  * @brief properties of one method argument
  *
- * I'm not particularly sure whether the <Type, M_index, Arg_index> is the optimal way to identify.
- *
- * Next, try with <std::meta::info> as NTTP.
- *
- * @tparam T The class the method belongs to
- * @tparam methodI the index of the method in the class
- * @tparam argI the index of the argument
+ * @tparam arg The reflection of the function argument
  */
-template <typename T, size_t methodI, size_t argI>
-struct argument_trait {
-  static constexpr auto meth_i =
-    std::meta::members_of(^^T, std::meta::access_context::unprivileged())[methodI];
-  static constexpr auto arg_i = std::meta::parameters_of(meth_i)[argI];
+template <std::meta::info arg>
+struct argument_t {
+  using type_t = [:std::meta::type_of(arg):];
 
-  using type_t = [:std::meta::type_of(arg_i):];
-
-  static constexpr auto name = std::meta::identifier_of(arg_i);
+  static constexpr auto name = std::meta::identifier_of(arg);
   static constexpr auto type_name = rtti::detail::type_name<type_t>();
 
-  static constexpr bool is_const = std::meta::is_const(arg_i);
-  static constexpr bool is_pointer = std::meta::is_pointer_type(arg_i);
-  static constexpr bool is_reference = std::meta::is_reference_type(arg_i);
+  static constexpr bool is_const = std::meta::is_const(arg);
+  static constexpr bool is_pointer = std::meta::is_pointer_type(arg);
+  static constexpr bool is_reference = std::meta::is_reference_type(arg);
 };
+
+/**
+ * @brief extract the parameter list from a function reflection
+ *
+ * @tparam m the function reflection
+ */
+template <std::meta::info m>
+struct parameters {
+  static constexpr auto list = std::define_static_array(std::meta::parameters_of(m));
+};
+
+/**
+ * @brief Predicate to be used to accept arguments
+ *
+ * All arguments shall be accepted, so always true.
+ *
+ * @tparam a the function argument reflection
+ */
+template <std::meta::info a>
+struct true_pred : std::true_type {
+};
+
+/**
+ * @brief Alias for extracting information about an argument list of a function
+ *
+ * Using the tuple builder structure, we can fix some of the strategies for the
+ * use with argument lists:
+ *   * \a parameters shall be extracted
+ *   * all arguments shall be taken
+ *   * the trait type is \a argument_t
+ *
+ * This leaves the function reflection as only template parameter
+ *
+ * @tparam method the function reflection
+ */
+template <std::meta::info method>
+using argument_tuple = rtti::tuple_builder_t<method, parameters, true_pred, argument_t>::tuple_type;
 
 /**
  * @brief Convert the argument-list tuple to an array of argument names
@@ -63,37 +91,5 @@ constexpr auto get_argument_name_array()
     return std::apply(get_array, tuple_t {});
   }
 }
-
-/**
- * @brief generate argument-trait tuple
- *
- * These 3 helper structs generate a tuple of argument-traits for an argument-list of a member
- * function of a class. This struct is generated recursively collecting the traits in the \a Args
- * parameter pack, incrementing the current argument index \a J. When the index reaches the total
- * size, the tuple is generated (last of the three specializations).
- *
- * There is one specialization for the case, no arguments are present
- *
- * @tparam T the class to consider (const)
- * @tparam I the index of the method (const)
- * @tparam J the current argument index
- * @tparam N the argument count of the method
- * @tparam Args collected argument traits
- */
-template <typename T, size_t I, size_t J, size_t N, typename... Args>
-struct args_helper {
-  using arg_tuple =
-    typename args_helper<T, I, J + 1, N, argument_trait<T, I, J>, Args...>::arg_tuple;
-};
-// case N == 0
-template <typename T, size_t I, size_t N>
-struct args_helper<T, I, N, N> {
-  using arg_tuple = std::tuple<>;
-};
-// recursion end
-template <typename T, size_t I, size_t N, typename... Args>
-struct args_helper<T, I, N, N, Args...> {
-  using arg_tuple = std::tuple<Args...>;
-};
 
 } // namespace rtti::details::arguments

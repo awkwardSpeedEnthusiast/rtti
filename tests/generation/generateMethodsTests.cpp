@@ -15,7 +15,9 @@ using namespace std::string_literals;
 
 TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
 {
-  auto nameMethod = createMethod<my::test::ns::MyTestClass, 1>();
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^my::test::ns::MyTestClass;
+  auto nameMethod = createMethod<std::meta::members_of(c, a)[1]>();
 
   EXPECT_EQ(nameMethod.name(), "name");
   EXPECT_EQ(nameMethod.returnType(), "std::__cxx11::basic_string<char>");
@@ -28,7 +30,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   EXPECT_FALSE(nameMethod.isFinal());
   EXPECT_TRUE(nameMethod.isMember());
 
-  auto setNameMethod = createMethod<my::test::ns::MyTestClass, 2>();
+  auto setNameMethod = createMethod<std::meta::members_of(c, a)[2]>();
 
   EXPECT_EQ(setNameMethod.name(), "setString");
   EXPECT_EQ(setNameMethod.returnType(), "void");
@@ -41,7 +43,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   EXPECT_FALSE(setNameMethod.isFinal());
   EXPECT_TRUE(setNameMethod.isMember());
 
-  auto value1Method = createMethod<my::test::ns::MyTestClass, 3>();
+  auto value1Method = createMethod<std::meta::members_of(c, a)[3]>();
 
   EXPECT_EQ(value1Method.name(), "values");
   EXPECT_EQ(value1Method.returnType(), "std::span<float>");
@@ -54,7 +56,7 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
   EXPECT_FALSE(value1Method.isFinal());
   EXPECT_TRUE(value1Method.isMember());
 
-  auto value2Method = createMethod<my::test::ns::MyTestClass, 4>();
+  auto value2Method = createMethod<std::meta::members_of(c, a)[4]>();
 
   EXPECT_EQ(value2Method.name(), "values");
   EXPECT_EQ(value2Method.returnType(), "std::span<const float>");
@@ -70,10 +72,13 @@ TEST(MethodGenerationTest, publicMethods_properties_MyTestClass)
 
 TEST(MethodGenerationTest, invokeMethods_MyTestClass)
 {
-  auto nameMethod = createMethod<my::test::ns::MyTestClass, 1>();
-  auto setNameMethod = createMethod<my::test::ns::MyTestClass, 2>();
-  auto value1Method = createMethod<my::test::ns::MyTestClass, 3>();
-  auto value2Method = createMethod<my::test::ns::MyTestClass, 4>();
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^my::test::ns::MyTestClass;
+
+  auto nameMethod = createMethod<std::meta::members_of(c, a)[1]>();
+  auto setNameMethod = createMethod<std::meta::members_of(c, a)[2]>();
+  auto value1Method = createMethod<std::meta::members_of(c, a)[3]>();
+  auto value2Method = createMethod<std::meta::members_of(c, a)[4]>();
 
   my::test::ns::MyTestClass object { "foo" };
 
@@ -86,8 +91,10 @@ TEST(MethodGenerationTest, invokeMethods_MyTestClass)
 
 TEST(MethodGenerationTest, methodTypes_base)
 {
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^BaseClass;
   {
-    auto m = createMethod<BaseClass, 0>();
+    auto m = createMethod<std::meta::members_of(c, a)[0]>();
     EXPECT_EQ(m.name(), "abstract_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -100,7 +107,7 @@ TEST(MethodGenerationTest, methodTypes_base)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<BaseClass, 1>();
+    auto m = createMethod<std::meta::members_of(c, a)[1]>();
     EXPECT_EQ(m.name(), "virtual_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -113,7 +120,7 @@ TEST(MethodGenerationTest, methodTypes_base)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<BaseClass, 2>();
+    auto m = createMethod<std::meta::members_of(c, a)[2]>();
     EXPECT_EQ(m.name(), "abstract_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -126,7 +133,7 @@ TEST(MethodGenerationTest, methodTypes_base)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<BaseClass, 3>();
+    auto m = createMethod<std::meta::members_of(c, a)[3]>();
     EXPECT_EQ(m.name(), "virtual_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -139,7 +146,7 @@ TEST(MethodGenerationTest, methodTypes_base)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<BaseClass, 4>();
+    auto m = createMethod<std::meta::members_of(c, a)[4]>();
     EXPECT_EQ(m.name(), "const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -152,7 +159,7 @@ TEST(MethodGenerationTest, methodTypes_base)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<BaseClass, 5>();
+    auto m = createMethod<std::meta::members_of(c, a)[5]>();
     EXPECT_EQ(m.name(), "method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -168,8 +175,10 @@ TEST(MethodGenerationTest, methodTypes_base)
 
 TEST(MethodGenerationTest, methodTypes_derived)
 {
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^DerivedClass;
   {
-    auto m = createMethod<DerivedClass, 0>();
+    auto m = createMethod<std::meta::members_of(c, a)[0]>();
     EXPECT_EQ(m.name(), "abstract_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -182,7 +191,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClass, 1>();
+    auto m = createMethod<std::meta::members_of(c, a)[1]>();
     EXPECT_EQ(m.name(), "virtual_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -195,7 +204,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClass, 2>();
+    auto m = createMethod<std::meta::members_of(c, a)[2]>();
     EXPECT_EQ(m.name(), "abstract_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -208,7 +217,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClass, 3>();
+    auto m = createMethod<std::meta::members_of(c, a)[3]>();
     EXPECT_EQ(m.name(), "virtual_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -221,7 +230,7 @@ TEST(MethodGenerationTest, methodTypes_derived)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClass, 4>();
+    auto m = createMethod<std::meta::members_of(c, a)[4]>();
     EXPECT_EQ(m.name(), "const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -237,8 +246,10 @@ TEST(MethodGenerationTest, methodTypes_derived)
 
 TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
 {
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^DerivedClassWithFinal;
   {
-    auto m = createMethod<DerivedClassWithFinal, 0>();
+    auto m = createMethod<std::meta::members_of(c, a)[0]>();
     EXPECT_EQ(m.name(), "abstract_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -251,7 +262,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClassWithFinal, 1>();
+    auto m = createMethod<std::meta::members_of(c, a)[1]>();
     EXPECT_EQ(m.name(), "virtual_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -264,7 +275,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClassWithFinal, 2>();
+    auto m = createMethod<std::meta::members_of(c, a)[2]>();
     EXPECT_EQ(m.name(), "abstract_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -277,7 +288,7 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<DerivedClassWithFinal, 3>();
+    auto m = createMethod<std::meta::members_of(c, a)[3]>();
     EXPECT_EQ(m.name(), "virtual_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -293,8 +304,10 @@ TEST(MethodGenerationTest, methodTypes_derivedWithFinal)
 
 TEST(MethodGenerationTest, methodTypes_final)
 {
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^FinalClass;
   {
-    auto m = createMethod<FinalClass, 0>();
+    auto m = createMethod<std::meta::members_of(c, a)[0]>();
     EXPECT_EQ(m.name(), "abstract_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -307,7 +320,7 @@ TEST(MethodGenerationTest, methodTypes_final)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<FinalClass, 1>();
+    auto m = createMethod<std::meta::members_of(c, a)[1]>();
     EXPECT_EQ(m.name(), "virtual_const_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -320,7 +333,7 @@ TEST(MethodGenerationTest, methodTypes_final)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<FinalClass, 2>();
+    auto m = createMethod<std::meta::members_of(c, a)[2]>();
     EXPECT_EQ(m.name(), "abstract_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -333,7 +346,7 @@ TEST(MethodGenerationTest, methodTypes_final)
     EXPECT_TRUE(m.isMember());
   }
   {
-    auto m = createMethod<FinalClass, 3>();
+    auto m = createMethod<std::meta::members_of(c, a)[3]>();
     EXPECT_EQ(m.name(), "virtual_method");
     EXPECT_EQ(m.returnType(), "int");
     EXPECT_EQ(m.description(), "");
@@ -349,7 +362,9 @@ TEST(MethodGenerationTest, methodTypes_final)
 
 TEST(MethodGenerationTest, ExcessiveArgumentsMethod)
 {
-  auto m = createMethod<ExcessiveArgument, 0>();
+  constexpr auto a = std::meta::access_context::unprivileged();
+  constexpr auto c = ^^ExcessiveArgument;
+  auto m = createMethod<std::meta::members_of(c, a)[0]>();
   EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "this", "one", "two", "three", "four", "five",
                                                     "six", "seven", "eight", "nine", "ten" }));
 }
