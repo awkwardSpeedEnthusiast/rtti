@@ -27,7 +27,7 @@ template <std::meta::info arg>
 struct argument_t {
   using type_t = [:std::meta::type_of(arg):];
 
-  static constexpr auto name = std::meta::identifier_of(arg);
+  static constexpr auto name = rtti::detail::item_name<arg>();
   static constexpr auto type_name = rtti::detail::type_name<type_t>();
 
   static constexpr bool is_const = std::meta::is_const(arg);

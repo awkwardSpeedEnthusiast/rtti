@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rtti/details/methodlist.hpp"
+#include "rtti/property_extraction.hpp"
 
 #include <meta>
 #include <type_traits>
@@ -18,5 +19,6 @@ struct class_traits {
 
   static constexpr auto const type_name = std::meta::identifier_of(std::meta::dealias(^^T));
   using method_tuple = typename methodList_builder<^^T>::tuple_type;
+  using property_tuple = typename property_list<T>::property_tuple;
 };
 } // namespace rtti::details

@@ -1,30 +1,31 @@
 #include "rtti/metaproperty.hpp"
+#include <string_view>
 
 namespace rtti
 {
-MetaProperty::MetaProperty(std::string name, std::string description, bool isTransient,
+MetaProperty::MetaProperty(std::string_view name, std::string_view description, bool isTransient,
                            MetaMethod getter)
-  : _name { std::move(name) }
-  , _description { std::move(description) }
+  : _name { name }
+  , _description { description }
   , _getter { std::move(getter) }
   , _isTransient(isTransient)
 {
 }
 
-MetaProperty::MetaProperty(std::string name, std::string description, bool isTransient,
+MetaProperty::MetaProperty(std::string_view name, std::string_view description, bool isTransient,
                            MetaMethod getter, MetaMethod notifier)
-  : _name { std::move(name) }
-  , _description { std::move(description) }
+  : _name { name }
+  , _description { description }
   , _getter { std::move(getter) }
   , _notifier { std::move(notifier) }
   , _isTransient(isTransient)
 {
 }
 
-MetaProperty::MetaProperty(std::string name, std::string description, bool isTransient,
+MetaProperty::MetaProperty(std::string_view name, std::string_view description, bool isTransient,
                            MetaMethod getter, MetaMethod setter, MetaMethod notifier)
-  : _name { std::move(name) }
-  , _description { std::move(description) }
+  : _name { name }
+  , _description { description }
   , _getter { std::move(getter) }
   , _setter { std::move(setter) }
   , _notifier { std::move(notifier) }

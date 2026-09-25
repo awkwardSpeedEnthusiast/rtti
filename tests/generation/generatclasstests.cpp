@@ -1,15 +1,18 @@
 #include "rtti/class_extraction.hpp"
 
+#include "data/classeswithannotations.hpp"
 #include "data/inheritance.hpp"
 #include "data/testclass.hpp"
 
 #include "rtti/metamethod.hpp"
+#include "rtti/metaproperty.hpp"
 #include "rtti/method_extraction.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using testing::ElementsAreArray;
+using testing::IsEmpty;
 using testing::SizeIs;
 
 TEST(ClassGeenerationTests, basic)
@@ -24,6 +27,7 @@ TEST(ClassGeenerationTests, basic)
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>(),
                                  createMethod<std::meta::members_of(c, a)[4]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
 }
 
 TEST(ClassGeenerationTests, BaseClass)
@@ -42,6 +46,7 @@ TEST(ClassGeenerationTests, BaseClass)
                                  createMethod<std::meta::members_of(c, a)[4]>(),
                                  createMethod<std::meta::members_of(c, a)[5]>() }));
   // currently no static member functions extracted.
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
 }
 
 TEST(ClassGeenerationTests, DerivedClass)
@@ -58,6 +63,7 @@ TEST(ClassGeenerationTests, DerivedClass)
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>(),
                                  createMethod<std::meta::members_of(c, a)[4]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
 }
 
 TEST(ClassGeenerationTests, DerivedClassWithFinalFunction)
@@ -73,6 +79,7 @@ TEST(ClassGeenerationTests, DerivedClassWithFinalFunction)
                                  createMethod<std::meta::members_of(c, a)[1]>(),
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
 }
 
 TEST(ClassGeenerationTests, FinalClass)
@@ -88,4 +95,46 @@ TEST(ClassGeenerationTests, FinalClass)
                                  createMethod<std::meta::members_of(c, a)[1]>(),
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+}
+
+TEST(ClassGeenerationTests, OneProperty)
+{
+  using T = test::TestingClass;
+  constexpr auto c = ^^T;
+  constexpr auto a = std::meta::access_context::unprivileged();
+  auto cls = rtti::createClass<T>();
+  EXPECT_EQ(cls->classname(), "TestingClass");
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(3));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(),
+              ElementsAreArray({ (createMethod<std::meta::members_of(c, a)[0]>()),
+                                 createMethod<std::meta::members_of(c, a)[1]>(),
+                                 createMethod<std::meta::members_of(c, a)[2]>() }));
+  using P = rtti::property_list<test::TestingClass>::property_tuple;
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), SizeIs(1));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(),
+              ElementsAreArray({ (rtti::createProperty<std::tuple_element_t<0, P>>()) }));
+}
+
+TEST(ClassGeenerationTests, TwoProperties)
+{
+  using T = test::TwoProperties;
+  constexpr auto c = ^^T;
+  constexpr auto a = std::meta::access_context::unprivileged();
+  auto cls = rtti::createClass<T>();
+  EXPECT_EQ(cls->classname(), "TwoProperties");
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(7));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(),
+              ElementsAreArray({ (createMethod<std::meta::members_of(c, a)[0]>()),
+                                 createMethod<std::meta::members_of(c, a)[1]>(),
+                                 createMethod<std::meta::members_of(c, a)[2]>(),
+                                 createMethod<std::meta::members_of(c, a)[3]>(),
+                                 createMethod<std::meta::members_of(c, a)[4]>(),
+                                 createMethod<std::meta::members_of(c, a)[5]>(),
+                                 createMethod<std::meta::members_of(c, a)[6]>() }));
+  using P = rtti::property_list<test::TwoProperties>::property_tuple;
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), SizeIs(2));
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(),
+              ElementsAreArray({ (rtti::createProperty<std::tuple_element_t<0, P>>()),
+                                 (rtti::createProperty<std::tuple_element_t<1, P>>()) }));
 }

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "rtti/details/classtrait.hpp"
+#include "rtti/property_extraction.hpp"
 
 #include "rtti/metaclass.hpp"
 #include "rtti/metamethod.hpp"
+#include "rtti/metaproperty.hpp"
 
 #include <ranges>
 #include <type_traits>
@@ -26,7 +28,9 @@ rtti::MetaClass* createClass()
     using trait = rtti::details::class_traits<T>;
     auto methodArray = rtti::details::get_array_from_tuple<typename trait::method_tuple>()
                      | std::ranges::to<std::vector>();
-    return rtti::MetaClass { trait::type_name, methodArray, {} };
+    auto propertyArray = rtti::get_properties_from_tuple<typename trait::property_tuple>()
+                       | std::ranges::to<std::vector>();
+    return rtti::MetaClass { trait::type_name, methodArray, propertyArray };
   }();
   return &theClass;
 }

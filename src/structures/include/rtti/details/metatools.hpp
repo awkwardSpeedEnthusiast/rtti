@@ -25,5 +25,24 @@ consteval auto type_name()
     return std::meta::display_string_of(type);
   }
 }
+
+/**
+ * @brief retrieve the identifier/name of a reflectin
+ *
+ * @tparam i the reflection in question
+ * @return consteval
+ */
+template <std::meta::info i>
+consteval auto item_name()
+{
+  if constexpr (std::meta::has_identifier(i)) {
+    return std::meta::identifier_of(i);
+  } else if constexpr (std::meta::is_function_parameter(i)) {
+    return "<arg>";
+  } else {
+    std::meta::display_string_of(i);
+  }
+}
+
 } // namespace rtti::detail
 #endif

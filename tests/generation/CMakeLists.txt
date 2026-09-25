@@ -7,6 +7,7 @@ my_add_test(generationtests
     generateMethodsTests.cpp
     data/testclass.cpp
     generatclasstests.cpp
+    annotationtests.cpp
   DEPENDS
     Rtti::Generation
     Rtti::Structures
