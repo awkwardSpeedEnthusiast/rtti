@@ -26,7 +26,7 @@ rtti::MetaClass* createClass()
     using trait = rtti::details::class_traits<T>;
     auto methodArray = rtti::details::get_array_from_tuple<typename trait::method_tuple>()
                      | std::ranges::to<std::vector>();
-    return rtti::MetaClass { trait::type_name, methodArray };
+    return rtti::MetaClass { trait::type_name, methodArray, {} };
   }();
   return &theClass;
 }

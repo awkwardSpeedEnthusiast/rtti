@@ -1,6 +1,7 @@
 my_add_test(structuretests 
   SOURCE 
     methodtests.cpp 
+    propertytests.cpp
   DEPENDS 
     Rtti::Structures
   COMPILE_OPTIONS 

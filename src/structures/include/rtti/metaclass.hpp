@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rtti/metamethod.hpp"
+#include "rtti/metaproperty.hpp"
 
 #include <span>
 #include <vector>
@@ -21,8 +22,10 @@ public:
    *
    * @param name name of the class
    * @param methods the MetaMethods representing methods in this class
+   * @param properties the MetaProperties representing properties in this class
    */
-  MetaClass(std::string_view name, std::vector<MetaMethod> methods);
+  MetaClass(std::string_view name, std::vector<MetaMethod> methods,
+            std::vector<MetaProperty> properties);
   MetaClass(MetaClass const&) = default;
   MetaClass(MetaClass&&) = default;
   MetaClass& operator=(MetaClass const&) = default;
@@ -63,6 +66,7 @@ public:
 
 private:
   std::vector<MetaMethod> _methods;
+  std::vector<MetaProperty> _properties;
   std::string _name;
 };
 } // namespace rtti
