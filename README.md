@@ -26,11 +26,14 @@ it is only tested with this compiler so far.
 
 ## Features and Usage
 
-This code actually only has 4 public interface headers.
+This code actually now has 7 public interface headers.
 * `rtti/metamethod.hpp`
 * `rtti/metaclass.hpp`
+* `rtti/metaproperty.hpp`
 * `rtti/method_extraction.hpp`
 * `rtti/class_extraction.hpp`
+* `rtti/property_definition.hpp`
+* `rtti/property_extraction.hpp`
 
 ### MetaMethod
 
@@ -40,6 +43,16 @@ Unfortunately it comes with the casting restrictions of `std::any`.
 
 This class uses reflection only if enabled, so it should compile with clang/msvc as 
 well.
+
+### MetaProperty
+
+Often you have one data member in your class, but obviously you don't want to expose the
+member itself, but provide accessors (getter + setter) and optimally a notifier (like Qt
+signal or `boost::signals2::signal`). So these 3 methods are connected. The class 
+`MetaProperty` reflects this connection collecting up to 3 `MetaMethod`s.
+
+To identify them automatically, some gymnastics need to be made with annotations. There is
+a description in `rtti/property_definition.hpp` and some example in the [tests](tests/generation/data/classeswithannotations.hpp).
 
 ### MetaClass
 
@@ -52,6 +65,11 @@ This class doesn't use reflections at all, should compile with clang/msvc as wel
 
 Creation method for MetaMethods using reflections and `std::meta`. And some 
 template magic.
+
+### createProperty
+
+Creation method for MetaPropertys using reflections and `std::meta`. And some serious
+template and annotation magic. 
 
 ### createClass
 
@@ -68,11 +86,11 @@ Some of the things I'm thinking about adding:
   * add meta-data identifying
     * Qt-like signals
     * notifier (callback) subscriptions, like `boost::signals2`
-    * properties (getter, setter, change-notifier)
 * **namespaces**: they are currently ignored 
 * **static member functions**: MetaMethods support them already, MetaClasses don't
 * **base classes**: MetaClass should host a list of base classes
 * enable **type conversion** for the MetaMethod invoke method for convertable types
 * **template functions** in MetaMethods; currently you have to instantiate to use it 
+* C++20 module: compilation times become serious with all that compile-time computation reflections require
 * ...
 
