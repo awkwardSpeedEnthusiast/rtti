@@ -87,7 +87,6 @@ Some of the things I'm thinking about adding:
     * notifier (callback) subscriptions, like `boost::signals2`
 * **namespaces**: they are currently ignored 
 * **static member functions**: MetaMethods support them already, MetaClasses don't
-* **base classes**: MetaClass should host a list of base classes
 * enable **type conversion** for the MetaMethod invoke method for convertable types
 * **template functions** in MetaMethods; currently you have to instantiate to use it 
 * C++20 module: compilation times become serious with all that compile-time computation reflections require
