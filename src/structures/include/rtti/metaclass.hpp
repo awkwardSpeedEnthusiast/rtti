@@ -23,13 +23,20 @@ public:
    * @param name name of the class
    * @param methods the MetaMethods representing methods in this class
    * @param properties the MetaProperties representing properties in this class
+   * @param bases the base classes of this class
    */
   MetaClass(std::string_view name, std::vector<MetaMethod> methods,
-            std::vector<MetaProperty> properties);
+            std::vector<MetaProperty> properties, std::vector<MetaClass*> bases);
   MetaClass(MetaClass const&) = default;
   MetaClass(MetaClass&&) = default;
   MetaClass& operator=(MetaClass const&) = default;
   MetaClass& operator=(MetaClass&&) = default;
+  auto operator<=>(MetaClass const& other) const = default;
+  auto operator==(MetaClass const& other) const
+  {
+    return _name == other._name && _methods == other._methods && _properties == other._properties
+        && _bases == other._bases;
+  }
 
   /**
    * @brief return an iterable representation of a list in this class
@@ -67,6 +74,7 @@ public:
 private:
   std::vector<MetaMethod> _methods;
   std::vector<MetaProperty> _properties;
+  std::vector<MetaClass*> _bases;
   std::string _name;
 };
 } // namespace rtti

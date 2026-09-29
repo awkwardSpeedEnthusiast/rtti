@@ -56,13 +56,12 @@ public:
 using rtti::MetaMethod;
 using testing::ElementsAreArray;
 using testing::Return;
-using M = rtti::MetaMethod::Mode;
 using namespace std::string_literals;
 
 TEST(MetaMethodTests, freeFunctions)
 {
   {
-    auto m = MetaMethod(&data::freeVoidFunction, "foo"s, "void"s, { "foo"s });
+    auto m = rtti::createMethod<^^data::freeVoidFunction>();
     m.invoke({ ""s });
     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "foo" }));
     EXPECT_FALSE(m.isConst());
@@ -74,7 +73,7 @@ TEST(MetaMethodTests, freeFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    auto m = MetaMethod(&data::freeFunction, "foo", "void", { "foo" });
+    auto m = rtti::createMethod<^^data::freeFunction>();
     std::any result;
     EXPECT_NO_THROW(result = m.invoke({ ""s }));
     EXPECT_EQ(result.type(), typeid(int));
@@ -92,29 +91,29 @@ TEST(MetaMethodTests, freeFunctions)
 }
 
 // not yet supported
-TEST(MetaMethodTests, annonymousFunctions)
-{
-  {
-    auto m = MetaMethod(data::lambda, "lambda", { "i" });
-    std::any result;
-    EXPECT_NO_THROW(result = m.invoke({ static_cast<int>(0) }));
-    EXPECT_EQ(result.type(), typeid(int));
-    EXPECT_EQ(std::any_cast<int>(result), 0);
-    EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "i" }));
-    EXPECT_TRUE(m.isConst());
-    EXPECT_FALSE(m.isFinal());
-    EXPECT_FALSE(m.isVirtual());
-    EXPECT_FALSE(m.isPureVirtual());
-    EXPECT_FALSE(m.isOverride());
-    EXPECT_TRUE(m.isMember());
-    EXPECT_TRUE(m.isLambda());
-  }
-}
+// TEST(MetaMethodTests, annonymousFunctions)
+// {
+//   {
+//     auto m = MetaMethod(data::lambda, "lambda", { "i" });
+//     std::any result;
+//     EXPECT_NO_THROW(result = m.invoke({ static_cast<int>(0) }));
+//     EXPECT_EQ(result.type(), typeid(int));
+//     EXPECT_EQ(std::any_cast<int>(result), 0);
+//     EXPECT_THAT(m.argumentNames(), ElementsAreArray({ "i" }));
+//     EXPECT_TRUE(m.isConst());
+//     EXPECT_FALSE(m.isFinal());
+//     EXPECT_FALSE(m.isVirtual());
+//     EXPECT_FALSE(m.isPureVirtual());
+//     EXPECT_FALSE(m.isOverride());
+//     EXPECT_TRUE(m.isMember());
+//     EXPECT_TRUE(m.isLambda());
+//   }
+// }
 
 TEST(MetaMethodTests, memberFunctions)
 {
   {
-    auto m = MetaMethod(&data::TestClass::function, "function", "int", { "this" });
+    auto m = rtti::createMethod<^^data::TestClass::function>();
     data::TestClass object;
     EXPECT_CALL(object, function()).WillOnce(Return(5));
     std::any result;
@@ -130,7 +129,7 @@ TEST(MetaMethodTests, memberFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    auto m = MetaMethod(&data::TestClass::const_function, "const_function", "double", { "this" });
+    auto m = rtti::createMethod<^^data::TestClass::const_function>();
     data::TestClass object;
     EXPECT_CALL(object, const_function()).WillOnce(Return(42.));
     std::any result;
@@ -146,8 +145,7 @@ TEST(MetaMethodTests, memberFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    auto m =
-      MetaMethod(&data::TestClass::template_function<int>, "template_function", "void", { "this" });
+    auto m = rtti::createMethod<^^data::TestClass::template_function<int>>();
     data::TestClass object;
     EXPECT_CALL(object, template_function_M()).WillOnce(Return(5));
     std::any result;
@@ -164,8 +162,7 @@ TEST(MetaMethodTests, memberFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    auto m = MetaMethod(&data::TestClass::template_const_function<int>, "template_const_function",
-                        "void", { "this" });
+    auto m = rtti::createMethod<^^data::TestClass::template_const_function<int>>();
     data::TestClass object;
     EXPECT_CALL(object, template_const_function_M()).WillOnce(Return(5));
     std::any result;
@@ -182,10 +179,7 @@ TEST(MetaMethodTests, memberFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    // cannot distinguish between static member functions and free functions by type alone, so we
-    // have to pass it as mode
-    auto m = MetaMethod(&data::TestClass::static_function, "static_function", "std::string", {},
-                        M::MEMBER);
+    auto m = rtti::createMethod<^^data::TestClass::static_function>();
     data::TestClass object;
     EXPECT_NO_THROW(m.invoke({ &object }););
     EXPECT_FALSE(m.isConst());
@@ -197,8 +191,7 @@ TEST(MetaMethodTests, memberFunctions)
     EXPECT_FALSE(m.isLambda());
   }
   {
-    auto m = MetaMethod(&data::TestClass::virtual_function, "virtual_function", "int", { "this" },
-                        M::VIRTUAL);
+    auto m = rtti::createMethod<^^data::TestClass::virtual_function>();
     data::TestClass object;
     EXPECT_NO_THROW(m.invoke({ &object }););
     EXPECT_FALSE(m.isConst());

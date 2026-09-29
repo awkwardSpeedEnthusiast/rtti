@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 class BaseClass
 {
 public:
@@ -96,4 +97,12 @@ public:
   {
     return 1;
   }
+};
+
+class Other
+{
+};
+
+class Multiple : public BaseClass, public Other
+{
 };

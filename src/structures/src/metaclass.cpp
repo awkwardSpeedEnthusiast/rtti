@@ -7,9 +7,10 @@ namespace rtti
 {
 
 MetaClass::MetaClass(std::string_view name, std::vector<MetaMethod> methods,
-                     std::vector<MetaProperty> properties)
+                     std::vector<MetaProperty> properties, std::vector<MetaClass*> bases)
   : _methods { std::move(methods) }
   , _properties { std::move(properties) }
+  , _bases { std::move(bases) }
   , _name { name }
 {
 }
@@ -26,10 +27,13 @@ std::span<T> MetaClass::range()
     return _methods;
   } else if constexpr (std::same_as<T, MetaProperty>) {
     return _properties;
+  } else if constexpr (std::same_as<T, MetaClass*>) {
+    return _bases;
   }
 }
 template std::span<MetaMethod> MetaClass::range<MetaMethod>();
 template std::span<MetaProperty> MetaClass::range<MetaProperty>();
+template std::span<MetaClass*> MetaClass::range<MetaClass*>();
 
 template <typename T>
 std::span<T const> MetaClass::range() const
@@ -38,9 +42,12 @@ std::span<T const> MetaClass::range() const
     return _methods;
   } else if constexpr (std::same_as<T, MetaProperty>) {
     return _properties;
+  } else if constexpr (std::same_as<T, MetaClass*>) {
+    return _bases;
   }
 }
 template std::span<MetaMethod const> MetaClass::range<MetaMethod>() const;
 template std::span<MetaProperty const> MetaClass::range<MetaProperty>() const;
+template std::span<MetaClass* const> MetaClass::range<MetaClass*>() const;
 
 } // namespace rtti

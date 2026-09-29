@@ -1,15 +1,16 @@
 #include "data/methods.hpp"
-#include "rtti/method_extraction.hpp"
+#include "rtti/metamethod.hpp"
 
 #include "data/inheritance.hpp"
 #include "data/testclass.hpp"
 
-#include "gmock/gmock.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using testing::ElementsAreArray;
 using testing::IsEmpty;
+
+using rtti::createMethod;
 
 using namespace std::string_literals;
 

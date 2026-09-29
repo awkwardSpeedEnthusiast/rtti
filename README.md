@@ -26,11 +26,10 @@ it is only tested with this compiler so far.
 
 ## Features and Usage
 
-This code actually now has 7 public interface headers.
+This code actually now has 6 public interface headers.
 * `rtti/metamethod.hpp`
 * `rtti/metaclass.hpp`
 * `rtti/metaproperty.hpp`
-* `rtti/method_extraction.hpp`
 * `rtti/class_extraction.hpp`
 * `rtti/property_definition.hpp`
 * `rtti/property_extraction.hpp`

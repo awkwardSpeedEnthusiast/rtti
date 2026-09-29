@@ -7,6 +7,7 @@
 #include "rtti/metamethod.hpp"
 #include "rtti/metaproperty.hpp"
 
+#include <meta>
 #include <ranges>
 #include <type_traits>
 
@@ -26,11 +27,15 @@ rtti::MetaClass* createClass()
 {
   static rtti::MetaClass theClass = []() {
     using trait = rtti::details::class_traits<T>;
-    auto methodArray = rtti::details::get_array_from_tuple<typename trait::method_tuple>()
+    auto methodArray = rtti::details::get_method_infos<T>()
+                     | std::views::transform([](auto const& i) { return MetaMethod { i }; })
                      | std::ranges::to<std::vector>();
     auto propertyArray = rtti::get_properties_from_tuple<typename trait::property_tuple>()
                        | std::ranges::to<std::vector>();
-    return rtti::MetaClass { trait::type_name, methodArray, propertyArray };
+    auto bases = rtti::details::get_base_list<^^T>()
+               | std::views::transform([](auto const& i) { return i.creator(); })
+               | std::ranges::to<std::vector>();
+    return rtti::MetaClass { trait::type_name, methodArray, propertyArray, bases };
   }();
   return &theClass;
 }

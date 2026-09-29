@@ -4,18 +4,23 @@
 #include "data/inheritance.hpp"
 #include "data/testclass.hpp"
 
+#include "rtti/metaclass.hpp"
 #include "rtti/metamethod.hpp"
 #include "rtti/metaproperty.hpp"
-#include "rtti/method_extraction.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <memory>
+#include <tuple>
 
 using testing::ElementsAreArray;
 using testing::IsEmpty;
 using testing::SizeIs;
 
-TEST(ClassGeenerationTests, basic)
+using rtti::createMethod;
+
+TEST(ClassGenerationTests, basic)
 {
   constexpr auto c = ^^my::test::ns::MyTestClass;
   constexpr auto a = std::meta::access_context::unprivileged();
@@ -28,9 +33,10 @@ TEST(ClassGeenerationTests, basic)
                                  createMethod<std::meta::members_of(c, a)[3]>(),
                                  createMethod<std::meta::members_of(c, a)[4]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
 }
 
-TEST(ClassGeenerationTests, BaseClass)
+TEST(ClassGenerationTests, BaseClass)
 {
   using T = BaseClass;
   constexpr auto c = ^^T;
@@ -47,9 +53,10 @@ TEST(ClassGeenerationTests, BaseClass)
                                  createMethod<std::meta::members_of(c, a)[5]>() }));
   // currently no static member functions extracted.
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
 }
 
-TEST(ClassGeenerationTests, DerivedClass)
+TEST(ClassGenerationTests, DerivedClass)
 {
   using T = DerivedClass;
   constexpr auto c = ^^T;
@@ -64,9 +71,10 @@ TEST(ClassGeenerationTests, DerivedClass)
                                  createMethod<std::meta::members_of(c, a)[3]>(),
                                  createMethod<std::meta::members_of(c, a)[4]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
 }
 
-TEST(ClassGeenerationTests, DerivedClassWithFinalFunction)
+TEST(ClassGenerationTests, DerivedClassWithFinalFunction)
 {
   using T = DerivedClassWithFinal;
   constexpr auto c = ^^T;
@@ -80,9 +88,10 @@ TEST(ClassGeenerationTests, DerivedClassWithFinalFunction)
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
 }
 
-TEST(ClassGeenerationTests, FinalClass)
+TEST(ClassGenerationTests, FinalClass)
 {
   using T = FinalClass;
   constexpr auto c = ^^T;
@@ -96,9 +105,21 @@ TEST(ClassGeenerationTests, FinalClass)
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
 }
 
-TEST(ClassGeenerationTests, OneProperty)
+TEST(ClassGenerationTests, Multiple)
+{
+  using T = Multiple;
+  auto cls = rtti::createClass<T>();
+  EXPECT_EQ(cls->classname(), "Multiple");
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(),
+              ElementsAreArray({ rtti::createClass<BaseClass>(), rtti::createClass<Other>() }));
+}
+
+TEST(ClassGenerationTests, OneProperty)
 {
   using T = test::TestingClass;
   constexpr auto c = ^^T;
@@ -114,9 +135,10 @@ TEST(ClassGeenerationTests, OneProperty)
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), SizeIs(1));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(),
               ElementsAreArray({ (rtti::createProperty<std::tuple_element_t<0, P>>()) }));
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
 }
 
-TEST(ClassGeenerationTests, TwoProperties)
+TEST(ClassGenerationTests, TwoProperties)
 {
   using T = test::TwoProperties;
   constexpr auto c = ^^T;
@@ -137,4 +159,6 @@ TEST(ClassGeenerationTests, TwoProperties)
   EXPECT_THAT(cls->range<rtti::MetaProperty>(),
               ElementsAreArray({ (rtti::createProperty<std::tuple_element_t<0, P>>()),
                                  (rtti::createProperty<std::tuple_element_t<1, P>>()) }));
+
+  EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
 }

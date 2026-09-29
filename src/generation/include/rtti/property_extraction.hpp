@@ -1,11 +1,10 @@
 #pragma once
 #include "property_definition.hpp"
-#include "rtti/details/methodlist.hpp"
+#include "rtti/details/methodtools.hpp"
 #include "rtti/details/propertystruct.hpp"
 #include "rtti/details/tuplebuilder.hpp"
 #include "rtti/metamethod.hpp"
 #include "rtti/metaproperty.hpp"
-#include "rtti/method_extraction.hpp"
 #include "rtti/property_definition.hpp"
 
 #include <meta>
@@ -213,14 +212,14 @@ template <typename trait>
 rtti::MetaProperty createProperty()
 {
   static rtti::MetaProperty property = []() {
-    rtti::MetaMethod getter = createMethod<trait::getter>();
+    auto getter = createMethod<trait::getter>();
     if constexpr (trait::has_notifier && trait::has_setter) {
-      rtti::MetaMethod setter = createMethod<trait::setter>();
-      rtti::MetaMethod notifier = createMethod<trait::notifier>();
+      auto setter = createMethod<trait::setter>();
+      auto notifier = createMethod<trait::notifier>();
       return rtti::MetaProperty { trait::name, trait::name, trait::is_transient,
                                   getter,      setter,      notifier };
     } else if constexpr (trait::has_notifier) {
-      rtti::MetaMethod notifier = createMethod<trait::notifier>();
+      auto notifier = createMethod<trait::notifier>();
       return rtti::MetaProperty { trait::name, trait::name, trait::is_transient, getter, notifier };
     } else {
       return rtti::MetaProperty { trait::name, trait::name, trait::is_transient, getter };

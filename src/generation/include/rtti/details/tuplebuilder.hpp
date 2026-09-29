@@ -22,6 +22,9 @@
  *
  * Please note, that \a Func takes the provided \a info as template parameter, while \a Pred and
  * \a Transform will get the list elements reflection as template parameter.
+ *
+ * \warning The recursive generation of a tuple is notoriously slow. When possible we should
+ *          transition to a function creating an array directly, which is possible with C++26.
  */
 namespace rtti::details
 {
@@ -43,14 +46,14 @@ template <std::meta::info info, template <std::meta::info b> typename Func,
           template <std::meta::info c> typename Pred,
           template <std::meta::info d> typename Transform, size_t I, typename... Args>
 struct tuple_builder_helper {
-  static constexpr auto list = Func<info>::list;
-  static constexpr auto instance = list[I - 1];
+  static constexpr auto instance = Func<info>::list[I - 1];
   static constexpr auto condition = Pred<instance>::value;
   using newType = ttt<instance, Transform, condition>::type;
   using vt = tuple_builder_helper<info, Func, Pred, Transform, I - 1, newType, Args...>::tuple_type;
   using vf = tuple_builder_helper<info, Func, Pred, Transform, I - 1, Args...>::tuple_type;
   using tuple_type = std::conditional_t<condition, vt, vf>;
 };
+
 // break recursion: no elements found
 template <std::meta::info m, template <std::meta::info b> typename Func,
           template <std::meta::info c> typename Pred,

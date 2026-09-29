@@ -1,6 +1,6 @@
+#include "rtti/metamethod.hpp"
 #include "rtti/metaproperty.hpp"
 
-#include <exception>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -30,13 +30,12 @@ using rtti::MetaMethod;
 using rtti::MetaProperty;
 using testing::ElementsAreArray;
 using testing::Return;
-using M = rtti::MetaMethod::Mode;
 using namespace std::string_literals;
 
 TEST(PropertyTests, constantProperty)
 {
   MetaProperty p { "value", "a value description", true,
-                   MetaMethod(&TestPropertyClass::getValue, "getValue", "int", { "this" }) };
+                   rtti::createMethod<^^TestPropertyClass::getValue>() };
   EXPECT_TRUE(p.readOnly());
   EXPECT_TRUE(p.constant());
   EXPECT_FALSE(p.setter().has_value());
@@ -52,9 +51,8 @@ TEST(PropertyTests, constantProperty)
 TEST(PropertyTests, readOnlyProperty)
 {
   MetaProperty p { "value", "a value description", true,
-                   MetaMethod(&TestPropertyClass::getValue, "getValue", "int", { "this" }),
-                   MetaMethod(&TestPropertyClass::valueChanged, "valueChanged", "void",
-                              { "this", "v" }) };
+                   rtti::createMethod<^^TestPropertyClass::getValue>(),
+                   rtti::createMethod<^^TestPropertyClass::valueChanged>() };
   EXPECT_TRUE(p.readOnly());
   EXPECT_FALSE(p.constant());
   EXPECT_FALSE(p.setter().has_value());
@@ -72,10 +70,9 @@ TEST(PropertyTests, readWriteProperty)
   MetaProperty p { "value",
                    "a value description",
                    true,
-                   MetaMethod(&TestPropertyClass::getValue, "getValue", "int", { "this" }),
-                   MetaMethod(&TestPropertyClass::setValue, "setValue", "void", { "this", "v" }),
-                   MetaMethod(&TestPropertyClass::valueChanged, "valueChanged", "void",
-                              { "this", "v" }) };
+                   rtti::createMethod<^^TestPropertyClass::getValue>(),
+                   rtti::createMethod<^^TestPropertyClass::setValue>(),
+                   rtti::createMethod<^^TestPropertyClass::valueChanged>() };
   EXPECT_FALSE(p.readOnly());
   EXPECT_FALSE(p.constant());
   EXPECT_TRUE(p.setter().has_value());
