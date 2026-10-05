@@ -24,8 +24,7 @@ consteval bool isFunction()
                 || std::meta::is_copy_constructor(mem) || std::meta::is_constructor(mem)
                 || std::meta::is_destructor(mem) || std::meta::is_copy_assignment(mem)
                 || std::meta::is_move_assignment(mem) || std::meta::is_assignment(mem)
-                || std::meta::is_variable(mem) || std::meta::is_static_member(mem)
-                || std::meta::is_operator_function(mem)) {
+                || std::meta::is_variable(mem) || std::meta::is_operator_function(mem)) {
     return false;
   } else if constexpr (std::meta::is_function(mem)) {
     return true;

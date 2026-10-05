@@ -14,11 +14,17 @@
 #include <memory>
 #include <tuple>
 
+using testing::ElementsAre;
 using testing::ElementsAreArray;
 using testing::IsEmpty;
+using testing::Property;
 using testing::SizeIs;
 
 using rtti::createMethod;
+using rtti::MetaMethod;
+
+using namespace std::string_literals;
+using namespace std::string_view_literals;
 
 TEST(ClassGenerationTests, basic)
 {
@@ -43,14 +49,23 @@ TEST(ClassGenerationTests, BaseClass)
   constexpr auto a = std::meta::access_context::unprivileged();
   auto cls = rtti::createClass<T>();
   EXPECT_EQ(cls->classname(), "BaseClass");
-  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(6));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(7));
   EXPECT_THAT(cls->range<rtti::MetaMethod>(),
               ElementsAreArray({ (createMethod<std::meta::members_of(c, a)[0]>()),
                                  createMethod<std::meta::members_of(c, a)[1]>(),
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>(),
                                  createMethod<std::meta::members_of(c, a)[4]>(),
-                                 createMethod<std::meta::members_of(c, a)[5]>() }));
+                                 createMethod<std::meta::members_of(c, a)[5]>(),
+                                 createMethod<std::meta::members_of(c, a)[6]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(),
+              ElementsAre(Property(&MetaMethod::name, "abstract_const_method"sv),
+                          Property(&MetaMethod::name, "virtual_const_method"sv),
+                          Property(&MetaMethod::name, "abstract_method"sv),
+                          Property(&MetaMethod::name, "virtual_method"sv),
+                          Property(&MetaMethod::name, "const_method"sv),
+                          Property(&MetaMethod::name, "method"sv),
+                          Property(&MetaMethod::name, "static_method"sv)));
   // currently no static member functions extracted.
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
@@ -63,13 +78,21 @@ TEST(ClassGenerationTests, DerivedClass)
   constexpr auto a = std::meta::access_context::unprivileged();
   auto cls = rtti::createClass<T>();
   EXPECT_EQ(cls->classname(), "DerivedClass");
-  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(5));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(), SizeIs(6));
   EXPECT_THAT(cls->range<rtti::MetaMethod>(),
               ElementsAreArray({ (createMethod<std::meta::members_of(c, a)[0]>()),
                                  createMethod<std::meta::members_of(c, a)[1]>(),
                                  createMethod<std::meta::members_of(c, a)[2]>(),
                                  createMethod<std::meta::members_of(c, a)[3]>(),
-                                 createMethod<std::meta::members_of(c, a)[4]>() }));
+                                 createMethod<std::meta::members_of(c, a)[4]>(),
+                                 createMethod<std::meta::members_of(c, a)[5]>() }));
+  EXPECT_THAT(cls->range<rtti::MetaMethod>(),
+              ElementsAre(Property(&MetaMethod::name, "abstract_const_method"sv),
+                          Property(&MetaMethod::name, "virtual_const_method"sv),
+                          Property(&MetaMethod::name, "abstract_method"sv),
+                          Property(&MetaMethod::name, "virtual_method"sv),
+                          Property(&MetaMethod::name, "const_method"sv),
+                          Property(&MetaMethod::name, "static_method"sv)));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
 }
