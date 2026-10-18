@@ -21,11 +21,12 @@ public:
    * @brief Construct a new Meta Class object
    *
    * @param name name of the class
+   * @param namespace the namespace the class is declared in
    * @param methods the MetaMethods representing methods in this class
    * @param properties the MetaProperties representing properties in this class
    * @param bases the base classes of this class
    */
-  MetaClass(std::string_view name, std::vector<MetaMethod> methods,
+  MetaClass(std::string_view name, std::string name_space, std::vector<MetaMethod> methods,
             std::vector<MetaProperty> properties, std::vector<MetaClass*> bases);
   MetaClass(MetaClass const&) = default;
   MetaClass(MetaClass&&) = default;
@@ -71,10 +72,34 @@ public:
    */
   std::string_view classname() const;
 
+  /**
+   * @brief return the namespace the class resides in
+   *
+   * @return std::string_view
+   */
+  std::string_view inNamespace() const;
+
+  /**
+   * @brief return the class name including the namespace
+   *
+   * @return std::string
+   */
+  std::string completeClassname() const;
+
+  /**
+   * @brief Query whether this class is derived from the other
+   *
+   * @param other a potential base class
+   * @return true if other is a direct or indirect base of this class,
+   * @return false otherwise
+   */
+  bool inherits(MetaClass const& other) const;
+
 private:
   std::vector<MetaMethod> _methods;
   std::vector<MetaProperty> _properties;
   std::vector<MetaClass*> _bases;
   std::string _name;
+  std::string _namespace;
 };
 } // namespace rtti

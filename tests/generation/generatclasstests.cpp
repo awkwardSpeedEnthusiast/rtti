@@ -69,6 +69,8 @@ TEST(ClassGenerationTests, BaseClass)
   // currently no static member functions extracted.
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
+  EXPECT_EQ(cls->inNamespace(), "");
+  EXPECT_EQ(cls->completeClassname(), "::BaseClass");
 }
 
 TEST(ClassGenerationTests, DerivedClass)
@@ -95,6 +97,8 @@ TEST(ClassGenerationTests, DerivedClass)
                           Property(&MetaMethod::name, "static_method"sv)));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
+  EXPECT_EQ(cls->inNamespace(), "");
+  EXPECT_EQ(cls->completeClassname(), "::DerivedClass");
 }
 
 TEST(ClassGenerationTests, DerivedClassWithFinalFunction)
@@ -112,6 +116,8 @@ TEST(ClassGenerationTests, DerivedClassWithFinalFunction)
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
+  EXPECT_EQ(cls->inNamespace(), "");
+  EXPECT_EQ(cls->completeClassname(), "::DerivedClassWithFinal");
 }
 
 TEST(ClassGenerationTests, FinalClass)
@@ -129,6 +135,12 @@ TEST(ClassGenerationTests, FinalClass)
                                  createMethod<std::meta::members_of(c, a)[3]>() }));
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), ElementsAreArray({ rtti::createClass<BaseClass>() }));
+  EXPECT_EQ(cls->inNamespace(), "");
+  EXPECT_EQ(cls->completeClassname(), "::FinalClass");
+  EXPECT_TRUE(cls->inherits(*rtti::createClass<BaseClass>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClassWithFinal>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClass>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<Other>()));
 }
 
 TEST(ClassGenerationTests, Multiple)
@@ -140,6 +152,12 @@ TEST(ClassGenerationTests, Multiple)
   EXPECT_THAT(cls->range<rtti::MetaProperty>(), IsEmpty());
   EXPECT_THAT(cls->range<rtti::MetaClass*>(),
               ElementsAreArray({ rtti::createClass<BaseClass>(), rtti::createClass<Other>() }));
+  EXPECT_EQ(cls->inNamespace(), "");
+  EXPECT_EQ(cls->completeClassname(), "::Multiple");
+  EXPECT_TRUE(cls->inherits(*rtti::createClass<BaseClass>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClassWithFinal>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClass>()));
+  EXPECT_TRUE(cls->inherits(*rtti::createClass<Other>()));
 }
 
 TEST(ClassGenerationTests, OneProperty)
@@ -159,6 +177,12 @@ TEST(ClassGenerationTests, OneProperty)
   EXPECT_THAT(cls->range<rtti::MetaProperty>(),
               ElementsAreArray({ (rtti::createProperty<std::tuple_element_t<0, P>>()) }));
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
+  EXPECT_EQ(cls->inNamespace(), "test");
+  EXPECT_EQ(cls->completeClassname(), "test::TestingClass");
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<BaseClass>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClassWithFinal>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<DerivedClass>()));
+  EXPECT_FALSE(cls->inherits(*rtti::createClass<Other>()));
 }
 
 TEST(ClassGenerationTests, TwoProperties)
@@ -184,4 +208,6 @@ TEST(ClassGenerationTests, TwoProperties)
                                  (rtti::createProperty<std::tuple_element_t<1, P>>()) }));
 
   EXPECT_THAT(cls->range<rtti::MetaClass*>(), IsEmpty());
+  EXPECT_EQ(cls->inNamespace(), "test");
+  EXPECT_EQ(cls->completeClassname(), "test::TwoProperties");
 }

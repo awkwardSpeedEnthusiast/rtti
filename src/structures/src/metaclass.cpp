@@ -6,18 +6,36 @@
 namespace rtti
 {
 
-MetaClass::MetaClass(std::string_view name, std::vector<MetaMethod> methods,
+MetaClass::MetaClass(std::string_view name, std::string nameSpace, std::vector<MetaMethod> methods,
                      std::vector<MetaProperty> properties, std::vector<MetaClass*> bases)
   : _methods { std::move(methods) }
   , _properties { std::move(properties) }
   , _bases { std::move(bases) }
   , _name { name }
+  , _namespace { nameSpace }
 {
 }
 
 std::string_view MetaClass::classname() const
 {
   return _name;
+}
+
+std::string_view MetaClass::inNamespace() const
+{
+  return _namespace;
+}
+
+std::string MetaClass::completeClassname() const
+{
+  return _namespace + "::" + _name;
+}
+
+bool MetaClass::inherits(MetaClass const& other) const
+{
+  return std::ranges::find_if(_bases,
+                              [&other](auto* b) { return *b == other || b->inherits(other); })
+      != _bases.end();
 }
 
 template <typename T>

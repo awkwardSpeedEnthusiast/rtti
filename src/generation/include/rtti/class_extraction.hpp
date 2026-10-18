@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rtti/details/classtrait.hpp"
+#include "rtti/details/namespace.hpp"
 #include "rtti/property_extraction.hpp"
 
 #include "rtti/metaclass.hpp"
@@ -35,7 +36,9 @@ rtti::MetaClass* createClass()
     auto bases = rtti::details::get_base_list<^^T>()
                | std::views::transform([](auto const& i) { return i.creator(); })
                | std::ranges::to<std::vector>();
-    return rtti::MetaClass { trait::type_name, methodArray, propertyArray, bases };
+    constexpr auto namesp = get_namespace_array<^^T>();
+    auto nsp = std::ranges::views::join_with(namesp, "::") | std::ranges::to<std::string>();
+    return rtti::MetaClass { trait::type_name, nsp, methodArray, propertyArray, bases };
   }();
   return &theClass;
 }
